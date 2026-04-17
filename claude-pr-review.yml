@@ -1,0 +1,108 @@
+name: Claude PR Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    # Only review PRs that are NOT design docs
+    # Design PRs are prefixed with [DESIGN] and don't need code review
+
+jobs:
+  review:
+    if: "!startsWith(github.event.pull_request.title, '[DESIGN]')"
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: splitwise
+          POSTGRES_PASSWORD: splitwise
+          POSTGRES_DB: splitwise_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        id: tests
+        run: npm test --workspaces -- --coverage
+        env:
+          DATABASE_URL: postgresql://splitwise:splitwise@localhost:5432/splitwise_test
+          NODE_ENV: test
+        continue-on-error: true
+
+      - name: Run lint
+        id: lint
+        run: npm run lint --workspaces
+        continue-on-error: true
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: >
+            --model claude-sonnet-4-6
+            --max_turns 20
+          direct_prompt: |
+            Review this PR as a senior engineer. Structure your review as follows:
+
+            ## Automated test results
+            - Tests: ${{ steps.tests.outcome }} 
+            - Lint: ${{ steps.lint.outcome }}
+
+            ## Code review
+
+            Check for each of these and comment on any issues found:
+
+            **Correctness**
+            - Does the implementation match the design doc in docs/designs/?
+            - Is the business logic correct, especially balance calculations?
+            - Are edge cases handled?
+
+            **Security**
+            - Are all routes that need auth actually protected?
+            - Is user input validated with Zod before use?
+            - Could any endpoint be used to access another user's data (IDOR)?
+            - Are SQL queries parameterized (Drizzle handles this, but verify)?
+
+            **Test quality**
+            - Is test coverage >= 80% for service files?
+            - Do tests actually assert meaningful behaviour, not just that code runs?
+            - Are error cases tested?
+
+            **Conventions (per CLAUDE.md)**
+            - Routes thin, logic in services?
+            - Soft deletes used?
+            - Transactions used for multi-table operations?
+            - Conventional commit on all commits in this PR?
+
+            ## Summary verdict
+            End your review with one of:
+            - ✅ **Approved** — ready to merge (no blocking issues)
+            - 🔧 **Changes requested** — list specific things to fix
+
+            If changes are requested, fix them on this branch before re-requesting review.
+        env:
+          DATABASE_URL: postgresql://splitwise:splitwise@localhost:5432/splitwise_test
