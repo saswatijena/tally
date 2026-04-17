@@ -13,7 +13,7 @@ A Splitwise replica built autonomously by Claude Code.
 
 ### 1. Clone and install
 ```bash
-git clone https://github.com/YOUR_USERNAME/splitwise-clone.git
+git clone https://github.com/YOUR_USERNAME/tally.git
 cd splitwise-clone
 npm install
 ```
