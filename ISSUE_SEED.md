@@ -1,7 +1,7 @@
 # Issue #1: MVP Core — Auth, Groups, Expenses, Balances
 
 ## Context
-We are building a Splitwise clone. This is the foundational MVP issue covering all core
+We are building tally. This is the foundational MVP issue covering all core
 functionality: user authentication, group management, expense tracking, and balance calculation.
 
 The full tech stack and conventions are in `CLAUDE.md`. Read it before doing anything else.

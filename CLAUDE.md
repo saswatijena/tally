@@ -1,7 +1,7 @@
-# Splitwise Clone — Claude Code Instructions
+# Tally — Claude Code Instructions
 
 ## Project Overview
-A Splitwise replica with core features: groups, expenses, and balance calculations.
+A tally app with core features: groups, expenses, and balance calculations.
 
 ## Tech Stack
 - **Backend**: Node.js 20 + Express

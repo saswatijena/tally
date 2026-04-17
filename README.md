@@ -1,6 +1,6 @@
-# Splitwise Clone
+# Tally
 
-A Splitwise replica built autonomously by Claude Code.
+A tally app built autonomously by Claude Code.
 
 **Stack**: Node.js 20 · Express · React 18 · PostgreSQL 15 · Drizzle ORM · TypeScript
 

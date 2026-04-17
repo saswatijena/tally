@@ -64,7 +64,7 @@ jobs:
             --model claude-sonnet-4-6
             --max_turns 50
           custom_instructions: |
-            You are working on the Splitwise clone project.
+            You are working on the tally project.
             Always read CLAUDE.md before taking any action.
             Follow the autonomous workflow exactly as described in CLAUDE.md.
             The approval gate is real — stop and wait when CLAUDE.md says to stop.
